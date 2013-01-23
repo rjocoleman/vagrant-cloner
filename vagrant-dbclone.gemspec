@@ -1,11 +1,12 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'vagrant-dbclone/version'
+
+version = '0.0.4'
 
 Gem::Specification.new do |gem|
   gem.name          = "vagrant-dbclone"
-  gem.version       = Vagrant::Dbclone::Version.to_s
+  gem.version       = version
   gem.authors       = ["Rob Yurkowski"]
   gem.email         = ["rob@yurkowski.net"]
   gem.description   = %q{A plugin for vagrant to copy down remote databases.}

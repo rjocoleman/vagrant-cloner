@@ -1,6 +1,6 @@
 require 'vagrant'
 
-require "vagrant-dbclone/version"
-
-require "vagrant-dbclone/config"
 require "vagrant-dbclone/provisioner"
+require "vagrant-dbclone/config"
+
+Vagrant.provisioners.register(:dbclone, Vagrant::Provisioners::Dbclone)
