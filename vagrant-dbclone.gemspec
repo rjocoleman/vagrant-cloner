@@ -5,8 +5,8 @@ require 'vagrant-dbclone/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "vagrant-dbclone"
-  gem.version       = Vagrant::Dbclone::VERSION
-  gem.authors       = ["Rob Yurkowski, Robert Coleman"]
+  gem.version       = Vagrant::Dbclone::Version.to_s
+  gem.authors       = ["Rob Yurkowski"]
   gem.email         = ["rob@yurkowski.net"]
   gem.description   = %q{A plugin for vagrant to copy down remote databases.}
   gem.summary       = %q{A plugin for vagrant to copy down remote databases.}
