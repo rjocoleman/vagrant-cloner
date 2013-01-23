@@ -3,7 +3,7 @@ module Vagrant
     class Version
       @major = 0
       @minor = 0
-      @tiny  = 2
+      @tiny  = 4
 
       class << self
         attr_reader :major, :minor, :tiny

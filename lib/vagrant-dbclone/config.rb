@@ -24,5 +24,3 @@ module Vagrant
     end
   end
 end
-
-Vagrant.config_keys.register(:dbclone) { Vagrant::Dbclone::Config }

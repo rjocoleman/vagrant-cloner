@@ -3,4 +3,4 @@ require 'vagrant'
 require "vagrant-dbclone/version"
 
 require "vagrant-dbclone/config"
-require "vagrant-dbclone/middleware"
+require "vagrant-dbclone/provisioner"
