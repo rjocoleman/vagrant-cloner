@@ -1,4 +1,4 @@
-# Vagrant::Dbclone
+# vagrant-cloner
 
 Copy down production resources to your new Vagrant VM.
 
@@ -6,7 +6,7 @@ Copy down production resources to your new Vagrant VM.
 
 Use vagrant's built-in gem system:
 
-    vagrant gem install vagrant-dbclone
+    vagrant gem install vagrant-cloner
 
 ## Usage
 

@@ -5,13 +5,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 version = '0.0.4'
 
 Gem::Specification.new do |gem|
-  gem.name          = "vagrant-dbclone"
+  gem.name          = "vagrant-cloner"
   gem.version       = version
   gem.authors       = ["Rob Yurkowski"]
   gem.email         = ["rob@yurkowski.net"]
-  gem.description   = %q{A plugin for vagrant to copy down remote databases.}
-  gem.summary       = %q{A plugin for vagrant to copy down remote databases.}
-  gem.homepage      = ""
+  gem.description   = %q{Copy production resources down to your new VM.}
+  gem.summary       = %q{Copy production resources down to your new VM.}
+  gem.homepage      = "https://github.com/robyurkowski/vagrant-cloner/"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }

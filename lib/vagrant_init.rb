@@ -1,1 +1,1 @@
-require 'vagrant-dbclone'
+require 'vagrant-cloner'
