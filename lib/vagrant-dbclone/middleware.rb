@@ -11,7 +11,8 @@ module Vagrant
         @env = env
         vm = env[:vm]
         options = vm.config.dbclone.to_hash
-        puts options.inspect
+        env[:ui].info "HELLO FROM DBCLONE!"
+        env[:ui].info options.inspect
 
         @app.call(env)
       end

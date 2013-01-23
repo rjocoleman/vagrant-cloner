@@ -1,24 +1,16 @@
 # Vagrant::Dbclone
 
-TODO: Write a gem description
+Copy down production resources to your new Vagrant VM.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Use vagrant's built-in gem system:
 
-    gem 'vagrant-dbclone'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install vagrant-dbclone
+    vagrant gem install vagrant-dbclone
 
 ## Usage
 
-TODO: Write usage instructions here
+TODO: Detail configuration details here.
 
 ## Contributing
 
