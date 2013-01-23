@@ -9,10 +9,10 @@ module Vagrant
 
       def call(env)
         @env = env
-        vm = env[:vm]
-        options = vm.config.dbclone.to_hash
+        #vm = env[:vm]
+        #options = vm.config.dbclone.to_hash
         env[:ui].info "HELLO FROM DBCLONE!"
-        env[:ui].info options.inspect
+        #env[:ui].info options.inspect
 
         @app.call(env)
       end
@@ -20,3 +20,5 @@ module Vagrant
     end
   end
 end
+
+Vagrant.actions[:start].insert_after Vagrant::Action::VM::Provision, Vagrant::Dbclone::Middleware
