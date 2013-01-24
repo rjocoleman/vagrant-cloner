@@ -3,20 +3,18 @@ module Vagrant
     class Cloner
 
       class ClonerConfig < Vagrant::Config::Base
-        attr_accessor :remote_server, :remote_port, :remote_user, :remote_password
+        attr_accessor :remote_host, :remote_user, :remote_password
         attr_accessor :remote_db_user, :remote_db_password
-        attr_accessor :databases_to_backup
+        attr_accessor :databases_to_clone
 
         attr_accessor :local_db_user, :local_db_password
 
         attr_accessor :enabled
+        attr_accessor :database_provider
+        attr_accessor :remote_backup_path, :local_backup_path, :backup_file
 
-        def remote_port
-          @remote_port.nil? ? (@remote_port = 22) : @remote_port.to_i
-        end
-
-        def databases_to_backup
-          @databases_to_backup.nil? ? (@databases_to_backup = '*') : @databases_to_backup
+        def databases_to_clone
+          @databases_to_clone.nil? ? (@databases_to_clone = '*') : @databases_to_clone
         end
 
         def enabled
@@ -25,7 +23,7 @@ module Vagrant
 
         def validate(env, errors)
           if enabled
-            errors.add('Remote server must be specified.') unless remote_server
+            errors.add('Remote server must be specified.') unless remote_host
             errors.add('Remote user/password must be specified.') unless remote_user && remote_password
             errors.add('Remote database user/password must be specified.') unless remote_db_user && remote_db_password
             errors.add('Local database user/password must be specified.') unless local_db_user && local_db_password

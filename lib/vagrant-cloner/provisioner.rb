@@ -6,8 +6,11 @@ module Vagrant
       end
 
       def provision!
-        env.ui.info "PROVISIONING WITH CLONER OMG OMG OMG"
-        env.ui.info "args: #{config.inspect}"
+        env[:ui].info "Vagrant-Cloner beginning back-up process."
+        copy_assets if config.enabled
+      end
+
+      def copy_assets
       end
     end
   end
