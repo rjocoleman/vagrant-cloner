@@ -3,13 +3,14 @@ module Vagrant
     class Cloner
 
       class ClonerConfig < Vagrant::Config::Base
+        attr_accessor :cloners
+
         attr_accessor :remote_host, :remote_user, :remote_password
         attr_accessor :remote_db_user, :remote_db_password
         attr_accessor :databases_to_clone
 
         attr_accessor :local_db_user, :local_db_password
 
-        attr_accessor :enabled
         attr_accessor :database_provider
         attr_accessor :remote_backup_path, :local_backup_path, :backup_file
 
@@ -22,7 +23,7 @@ module Vagrant
         end
 
         def validate(env, errors)
-          if enabled
+          if cloners.any?
             errors.add('Remote server must be specified.') unless remote_host
             errors.add('Remote user/password must be specified.') unless remote_user && remote_password
             errors.add('Remote database user/password must be specified.') unless remote_db_user && remote_db_password
