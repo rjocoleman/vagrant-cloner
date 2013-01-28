@@ -1,9 +1,10 @@
 module Vagrant
   module Cloners
-    class MysqlCloner
-      include Cloner
+    class MysqlCloner < Cloner
 
-      def initialize(options)
+      def initialize(options, env)
+        @env                    = env
+
         @remote_host            = options.remote_host
         @remote_user            = options.remote_user
         @remote_password        = options.remote_password
@@ -12,20 +13,26 @@ module Vagrant
 
         @databases_to_clone     = options.databases_to_clone
 
-        @local_db_user          = options.local_db_user
-        @local_db_password      = options.local_db_password
+        @vm_db_user          = options.local_db_user
+        @vm_db_password      = options.local_db_password
 
         # TODO: We should probably check these exist
         @remote_backup_path     = options.remote_backup_path || "/home/#{@remote_user}"
         @local_backup_path      = options.local_backup_path || File.expand_path(".")
+        @vm_backup_path         = options.vm_backup_path || File.expand_path("~")
         @backup_file            = options.backup_file || "mysql-backup-#{datestring}.sql"
 
         @remote_backup_location = File.join(@remote_backup_path, @backup_file)
         @local_backup_location  = File.join(@local_backup_path, @backup_file)
+        @vm_backup_location     = File.join(@vm_backup_path, @backup_file)
+      end
+
+      def remote_credentials
+        [@remote_host, @remote_user, {:password => @remote_password}]
       end
 
       def mysql_database_flag
-        if @databases_to_clone == '*'
+        if @databases_to_clone.include?("*")
           "--all-databases"
         else
           "--databases #{Array(@databases_to_clone).join(' ')}"
@@ -40,36 +47,33 @@ module Vagrant
       end
 
       def dump_remote_database
-        ssh do |s|
-          command = "mysqldump -u#{@remote_db_user} -p#{@remote_db_password} #{mysql_database_flag} > #{@remote_backup_location}"
-          info " >> #{command}"
-          s.exec! command
-          info "Finished dumping database!"
-        end
+        command = "mysqldump -u#{@remote_db_user} -p#{@remote_db_password} #{mysql_database_flag} > #{@remote_backup_location}"
+        ssh {|s| s.exec! command }
+        info "Finished dumping database!"
       end
 
+      # TODO: Check if file already exists locally. If it does, use that. We should clean this up on each
+      # subsequent invocation of the provisioner.
       def download_remote_database
-        scp do |s|
-          info " >> net/scp #{@remote_backup_location}, #{@local_backup_path}"
-          s.download! @remote_backup_location, @local_backup_path
-          info "Finished downloading file."
-        end
+        scp {|s| s.download! @remote_backup_location, @local_backup_path }
+        info "Finished downloading file."
       end
 
       def import_database
-        command = "mysql -u#{@local_db_user} -p#{@local_db_password} < #{@local_backup_location}"
-        info " >> #{command}"
-        system command
+        vm.upload @local_backup_path, @vm_backup_path
+        vm.execute "mysql -u#{@vm_db_user} -p#{@vm_db_password} < #{@vm_backup_location}"
         info "Done loading database."
       end
 
+      # TODO: Do this at the start of every invocation?
       def clean_up
-        info "Cleaning up."
-        ssh do |s|
-          s.exec! "rm #{@remote_backup_location}"
-          info "Removed remote backup file."
-        end
+        ssh {|s| s.exec! "rm #{@remote_backup_location}" }
+        info "Removed remote backup file."
+
         system "rm #{@local_backup_location}"
+        info "Removed local backup file."
+
+        vm.execute "rm #{@vm_backup_location}"
         info "Done!"
       end
     end

@@ -2,7 +2,7 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-version = '0.0.5'
+version = '0.0.7'
 
 Gem::Specification.new do |gem|
   gem.name          = "vagrant-cloner"

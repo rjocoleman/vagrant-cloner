@@ -11,7 +11,7 @@ module Vagrant
           config.cloners.each do |cloner|
             cloner = cloner.capitalize + "Cloner"
             if Vagrant::Cloners.constants.include?(cloner.to_sym) && (klass = Vagrant::Cloners.const_get(cloner)).is_a?(Class)
-              klass.const_get(cloner).new(config).call
+              klass.new(config, env).call
             else
               env[:ui].error "Cloner #{cloner} does not exist. Skipping."
             end
