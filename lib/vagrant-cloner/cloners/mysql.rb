@@ -1,6 +1,7 @@
 module Vagrant
   module Cloners
     class MysqlCloner < Cloner
+      attr_reader :remote_credentials
 
       def initialize(options, env)
         @env                    = env
@@ -13,13 +14,15 @@ module Vagrant
 
         @databases_to_clone     = options.databases_to_clone
 
-        @vm_db_user          = options.local_db_user
-        @vm_db_password      = options.local_db_password
+        @vm_db_user          = options.vm_db_user
+        @vm_db_password      = options.vm_db_password
+
+        @remote_credentials  = options.remote_credentials || [@remote_host, @remote_user, {:password => @remote_password}]
 
         # TODO: We should probably check these exist
         @remote_backup_path     = options.remote_backup_path || "/home/#{@remote_user}"
         @local_backup_path      = options.local_backup_path || File.expand_path(".")
-        @vm_backup_path         = options.vm_backup_path || File.expand_path("~")
+        @vm_backup_path         = options.vm_backup_path || "/vagrant"
         @backup_file            = options.backup_file || "mysql-backup-#{datestring}.sql"
 
         @remote_backup_location = File.join(@remote_backup_path, @backup_file)
@@ -27,12 +30,8 @@ module Vagrant
         @vm_backup_location     = File.join(@vm_backup_path, @backup_file)
       end
 
-      def remote_credentials
-        [@remote_host, @remote_user, {:password => @remote_password}]
-      end
-
       def mysql_database_flag
-        if @databases_to_clone.include?("*")
+        if @databases_to_clone.include?("*") || @databases_to_clone.empty?
           "--all-databases"
         else
           "--databases #{Array(@databases_to_clone).join(' ')}"
@@ -60,7 +59,7 @@ module Vagrant
       end
 
       def import_database
-        vm.upload @local_backup_path, @vm_backup_path
+        vm.upload @local_backup_location, @vm_backup_path
         vm.execute "mysql -u#{@vm_db_user} -p#{@vm_db_password} < #{@vm_backup_location}"
         info "Done loading database."
       end

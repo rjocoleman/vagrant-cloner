@@ -3,9 +3,8 @@ require 'net/ssh'
 require 'net/scp'
 require 'date'
 
-# We need to make these available to expose netssh and netscp to cloners.
-VagrantPlugins::CommunicatorSSH::Communicator.send(:public, :connect)
-VagrantPlugins::CommunicatorSSH::Communicator.send(:public, :scp_connect)
+# We make this available to expose netssh to cloners.
+Vagrant::Communication::SSH.send(:public, :connect)
 
 module Vagrant
   module Cloners
