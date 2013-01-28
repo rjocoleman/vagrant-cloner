@@ -72,7 +72,8 @@ module Vagrant
         system "rm #{@local_backup_location}"
         info "Removed local backup file."
 
-        vm.execute "rm #{@vm_backup_location}"
+        # TODO: Find out why this is unnecessary. This file shouldn't be removed. Where does it go?!
+        #vm.execute "rm #{@vm_backup_location}"
         info "Done!"
       end
     end
