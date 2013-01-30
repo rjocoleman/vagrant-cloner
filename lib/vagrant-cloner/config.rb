@@ -43,10 +43,25 @@ module Vagrant
                       # [Optional] Override to change the arguments passed to Net::SSH and Net::SCP.
                       :remote_credentials
 
+        def remote_credentials
+          [@remote_host, @remote_user, {:password => @remote_password}]
+        end
+
         def databases_to_clone
           @databases_to_clone.nil? ? (@databases_to_clone = []) : @databases_to_clone
         end
 
+        def remote_backup_path
+          @remote_backup_path.nil? ? (@remote_backup_path = "/tmp") : @remote_backup_path
+        end
+
+        def local_backup_path
+          @local_backup_path.nil? ? (@local_backup_path = "/tmp") : @local_backup_path
+        end
+
+        def vm_backup_path
+          @vm_backup_path.nil? ? (@vm_backup_path = "/tmp") : @vm_backup_path
+        end
 
         def validate(env, errors)
           if cloners.any?

@@ -14,15 +14,15 @@ module Vagrant
 
         @databases_to_clone     = options.databases_to_clone
 
-        @vm_db_user          = options.vm_db_user
-        @vm_db_password      = options.vm_db_password
+        @vm_db_user             = options.vm_db_user
+        @vm_db_password         = options.vm_db_password
 
-        @remote_credentials  = options.remote_credentials || [@remote_host, @remote_user, {:password => @remote_password}]
+        @remote_credentials     = options.remote_credentials
 
         # TODO: We should probably check these exist
-        @remote_backup_path     = options.remote_backup_path || "/home/#{@remote_user}"
-        @local_backup_path      = options.local_backup_path || File.expand_path(".")
-        @vm_backup_path         = options.vm_backup_path || "/vagrant"
+        @remote_backup_path     = options.remote_backup_path
+        @local_backup_path      = options.local_backup_path
+        @vm_backup_path         = options.vm_backup_path
         @backup_file            = options.backup_file || "mysql-backup-#{datestring}.sql"
 
         @remote_backup_location = File.join(@remote_backup_path, @backup_file)
@@ -59,21 +59,16 @@ module Vagrant
       end
 
       def import_database
-        vm.upload @local_backup_location, @vm_backup_path
+        vm.upload @local_backup_location, @vm_backup_location
         vm.execute "mysql -u#{@vm_db_user} -p#{@vm_db_password} < #{@vm_backup_location}"
         info "Done loading database."
       end
 
       # TODO: Do this at the start of every invocation?
       def clean_up
-        ssh {|s| s.exec! "rm #{@remote_backup_location}" }
-        info "Removed remote backup file."
-
-        system "rm #{@local_backup_location}"
-        info "Removed local backup file."
-
-        # TODO: Find out why this is unnecessary. This file shouldn't be removed. Where does it go?!
-        #vm.execute "rm #{@vm_backup_location}"
+        ssh {|s| s.exec! "rm #{@remote_backup_location}" } and info "Removed remote backup file."
+        system "rm #{@local_backup_location}" and info "Removed local backup file."
+        vm.execute "rm #{@vm_backup_location}" and info "Removed vm backup file."
         info "Done!"
       end
     end
