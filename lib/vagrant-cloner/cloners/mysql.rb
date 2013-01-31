@@ -1,11 +1,71 @@
 module Vagrant
   module Cloners
     class MysqlCloner < Cloner
-      attr_reader :remote_credentials
+      attr_reader     :remote_credentials
 
-      def initialize(options, env)
-        @env                    = env
+                      # [Required] The FQDN of the host where data is to be synced from
+      attr_accessor   :remote_host,
 
+                      # [Required] The username and password to access the remote host
+                      :remote_user,
+                      :remote_password,
+
+                      # [Required] The database user and password to access the remote database
+                      :remote_db_user,
+                      :remote_db_password,
+
+                      # [Required] The user and password to the database on the VM
+                      :vm_db_user,
+                      :vm_db_password,
+
+                      # [Optional] The databases that we should clone
+                      # - An empty array indicates we should clone all
+                      # - An array containing '*' will clone all as well;
+                      # - An array containing a list of database names will clone only those.
+                      :databases_to_clone,
+
+                      # [Optional] The location to temporarily store the database backup on the remote machine
+                      :remote_backup_path,
+
+                      # [Optional] The location to temporarily store the database backup on our machine
+                      :local_backup_path,
+
+                      # [Optional] The location to temporarily store the database backup on the VM
+                      :vm_backup_path,
+
+                      # [Optional] The name of the backup file
+                      :backup_file,
+
+                      # [Optional] Override to change the arguments passed to Net::SSH and Net::SCP.
+                      :remote_credentials
+
+      def name
+        "mysql"
+      end
+
+      def remote_credentials
+        [@remote_host, @remote_user, {:password => @remote_password}]
+      end
+
+      def databases_to_clone
+        @databases_to_clone ||= []
+      end
+
+      def remote_backup_path
+        @remote_backup_path ||= "/tmp"
+      end
+
+      def local_backup_path
+        @local_backup_path ||= "/tmp"
+      end
+
+      def vm_backup_path
+        @vm_backup_path ||= "/tmp"
+      end
+
+
+      def extract_relevant_options
+        @enabled                = options.enabled
         @remote_host            = options.remote_host
         @remote_user            = options.remote_user
         @remote_password        = options.remote_password
@@ -19,7 +79,6 @@ module Vagrant
 
         @remote_credentials     = options.remote_credentials
 
-        # TODO: We should probably check these exist
         @remote_backup_path     = options.remote_backup_path
         @local_backup_path      = options.local_backup_path
         @vm_backup_path         = options.vm_backup_path
@@ -39,6 +98,7 @@ module Vagrant
       end
 
       def call
+        extract_relevant_options
         dump_remote_database
         download_remote_database
         import_database
@@ -47,14 +107,12 @@ module Vagrant
 
       def dump_remote_database
         command = "mysqldump -u#{@remote_db_user} -p#{@remote_db_password} #{mysql_database_flag} > #{@remote_backup_location}"
-        ssh {|s| s.exec! command }
+        ssh(*remote_credentials) {|s| s.exec! command }
         info "Finished dumping database!"
       end
 
-      # TODO: Check if file already exists locally. If it does, use that. We should clean this up on each
-      # subsequent invocation of the provisioner.
       def download_remote_database
-        scp {|s| s.download! @remote_backup_location, @local_backup_path }
+        scp(*remote_credentials) {|s| s.download! @remote_backup_location, @local_backup_path }
         info "Finished downloading file."
       end
 
@@ -64,9 +122,8 @@ module Vagrant
         info "Done loading database."
       end
 
-      # TODO: Do this at the start of every invocation?
       def clean_up
-        ssh {|s| s.exec! "rm #{@remote_backup_location}" } and info "Removed remote backup file."
+        ssh(*remote_credentials) {|s| s.exec! "rm #{@remote_backup_location}" } and info "Removed remote backup file."
         system "rm #{@local_backup_location}" and info "Removed local backup file."
         vm.execute "rm #{@vm_backup_location}" and info "Removed vm backup file."
         info "Done!"
@@ -74,3 +131,5 @@ module Vagrant
     end
   end
 end
+
+Vagrant::Provisioners::Cloner::ClonerConfig.register_cloner Vagrant::Cloners::MysqlCloner.instance.name, Vagrant::Cloners::MysqlCloner.instance

@@ -1,19 +1,30 @@
-require 'vagrant'
 require 'net/ssh'
 require 'net/scp'
 require 'date'
-
-# We make this available to expose netssh to cloners.
-Vagrant::Communication::SSH.send(:public, :connect)
+require 'singleton'
 
 module Vagrant
   module Cloners
-    autoload :MysqlCloner, 'vagrant-cloner/cloners/mysql'
-
     # Cloner defines the base API that a cloner has to modify a VM or remote systems.
     # TODO: Create a method that downloads to local and then uploads to VM?
-    #
+
     class Cloner
+      include Singleton
+
+      attr_accessor :enabled, :env, :options
+
+      def name
+        raise "Cloner must define #name and return a string."
+      end
+
+      def validate!
+        true
+      end
+
+      def enabled?
+        @enabled.nil? ? false : @enabled
+      end
+
       # Shorthand for addressing the SSH communicator to the VM. View available methods
       # here:
       # https://github.com/mitchellh/vagrant/blob/master/plugins/communicators/ssh/communicator.rb
@@ -25,8 +36,8 @@ module Vagrant
       #
       # See netssh documentation for further method options.
       # http://net-ssh.github.com/net-ssh/
-      def ssh(&block)
-        Net::SSH.start(*remote_credentials, &block)
+      def ssh(*args, &block)
+        Net::SSH.start(*args, &block)
       end
 
       # Opens an SCP connection to an arbitrary server, downloading or uploading to the
@@ -36,34 +47,22 @@ module Vagrant
       #
       # See netscp documentation for further method options.
       # https://github.com/net-ssh/net-scp
-      def scp(&block)
-        Net::SCP.start(*remote_credentials, &block)
+      def scp(*args, &block)
+        Net::SCP.start(*args, &block)
       end
 
-      # Makes the action environment accessible as 'env' simply.
-      def env
-        @env
-      end
-      protected :env
-
-      # Returns the current date in YYYY-MM-DD format.
       def datestring
         Date.today.to_s
       end
       protected :datestring
 
-      # Output a message.
+      # Wrap debugging options.
       %w(info warn error success).each do |meth|
         define_method(meth) do |message|
           env[:ui].send(meth.to_sym, message)
         end
         protected meth.to_sym
       end
-
-      def remote_credentials
-        [@remote_host, @remote_user, {:password => @remote_password}]
-      end
-      protected :remote_credentials
     end
   end
 end
