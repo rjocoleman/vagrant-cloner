@@ -15,74 +15,94 @@ order for Cloner to work. This should come after your other provisioners; if
 Cloner runs before Chef or Puppet, for example, it's quite conceivable there 
 would be no database to restore to!
 
-These are the configuration keys required / optional to modify Cloner's behaviour:
+Each cloner has its own section inside the configuration, and this is the
+recommended way to set them:
 
-```
-# [Required] Which cloners should we use? (Empty array permitted)
-:cloners,
-
-# [Required] The FQDN of the host where data is to be synced from
-:remote_host,
-
-# [Required] The username and password to access the remote host
-:remote_user,
-:remote_password,
-
-# [Required] The database user and password to access the remote database
-:remote_db_user,
-:remote_db_password,
-
-# [Required] The user and password to the database on the VM
-:vm_db_user,
-:vm_db_password,
-
-# [Optional] The databases that we should clone
-# - An empty array indicates we should clone all
-# - An array containing '*' will clone all as well;
-# - An array containing a list of database names will clone only those.
-:databases_to_clone,
-
-# [Optional] The location to temporarily store the database backup on the remote machine
-:remote_backup_path,
-
-# [Optional] The location to temporarily store the database backup on our machine
-:local_backup_path,
-
-# [Optional] The location to temporarily store the database backup on the VM
-:vm_backup_path,
-
-# [Optional] The name of the backup file
-:backup_file,
-
-# [Optional] Override to change the arguments passed to Net::SSH and Net::SCP.
-:remote_credentials
-
-```
-
-These options must be configured inside your `Vagrantfile`:
-
-```
+``` ruby
 Vagrant::Config.run do |config|
 
+  config.vm.provision :chef_solo do |chef|
     # ...
   end
 
-  config.vm.provision :cloner do |cloner|
-    cloner.cloners = %w(mysql)
-    cloners.remote_host = 'myserver.com'
-
-    # ...
+  config.vm.provision :cloner do |cfg|
+    cfg.cloners.mysql.tap do |c|
+      # Set options here.
+      c.enabled = true
+      # ...
+    end
   end
 end
 ```
+
+The following keys are valid:
+
+- **extra_cloners_directory** - a full path to a directory where you can load your own cloners. Loaded files should load their configuration into the **cloners** section if composed properly.
+- **cloners**
+  - **mysql**
+    - **enabled** - Boolean whether to use this cloner or not. Defaults to false.
+    - **remote_host** - String containing the remote server's FQDN.
+    - **remote_user** - Username to connect to remote server.
+    - **remote_password** - Optional: Password to connect to remote server. (Can be ignored if using publickey auth.)
+    - **remote_db_user** - Username to remote database server.
+    - **remote_db_password** - Password to remote database server.
+    - **vm_db_user** - Username to database server on VM.
+    - **vm_db_password** - Password to database server on VM.
+    - **databases_to_clone** - Optional: Array of databases to copy down. Defaults to 'all'.
+    - **remote_backup_path** - Optional: Where to dump databases to on remote server. Defaults to '/tmp'.
+    - **local_backup_path** - Optional: Where to store databases on host machine. Defaults to '/tmp'.
+    - **vm_backup_path** - Optional: Where to upload databases on VM. Defaults to '/tmp'.
+    - **backup_file** - Optional: Name for database dump. Defaults to mysql-dump-YYYY-MM-DD.sql.
+    - **disable_cleanup** - Optional: Don't remove database dumps after completion. Defaults to false.
+  - **testcloner**
+    - **enabled** - Boolean whether to use this cloner or not. Defaults to false.
+    - **foo** - String containing a message to print to console.
 
 If you have some concern about storing passwords in this file (i.e. your Vagrantfile
 is under version control), remember that the Vagrantfile is fully executed, so you can
 simply require a file from elsewhere or read values in.
 
-## Current List of Cloners
+## Current List of Supplied Cloners
 
-- `mysql` -- import a MySQL database(s)
+- `mysql` - Import a MySQL database(s)
+- `testcloner` - A simple example of a cloner not meant for use.
+
+## Extra Cloners
+
+You can write your own cloners to use with the tool. Unfortunately, because of how Vagrant loads its configuration settings, it's not possible to store these in a directory that is not in the gem itself.
+
+Our suggestion is as follows:
+
+1. Fork the gem and git-clone it;
+2. Add your own cloner inside lib/vagrant-cloner/cloners/;
+3. Add your configuration settings inside your Vagrantfile;
+4. Run `rake build`;
+5. Run `vagrant gem install vagrant-cloner --local ./pkg/`
+6. Resume using vagrant as usual.
+
+If you make an error in your script, you may have a hard time uninstalling it with `vagrant gem uninstall`. In a trice, you can remove directories in `~/.vagrant.d/gems/gems/` to manually remove troublesome gems. (Note that this was tested on a Linux distribution, so this may vary for Mac and Windows users.)
+
+To operate as a cloner, a class must inherit from `Vagrant::Cloners::Cloner`, and implement at a bare minimum these methods:
+
+- `name` - Returns a string representation of the cloner's name; used for namespacing config.
+- `validate!(env, errors)` - Can be used to call `errors.add` if there are validations that need to be performed on configuration values.
+- `call` - Executes the cloner's routine.
+
+A cloner must also be registered in the config to be run. This is best done after the class has been closed, at the bottom of the file:
+
+`Vagrant::Provisioners::Cloner::ClonerConfig.register_cloner <Class>.instance.name, <Class>.instance`
+
+So for the MySQL cloner (which is `Vagrant::Cloners::MysqlCloner`), the line would read 
+
+`Vagrant::Provisioners::Cloner::ClonerConfig.register_cloner Vagrant::Cloners::MysqlCloner.instance.name, Vagrant::Cloners::MysqlCloner.instance`
+
+A very minimal example [can be found in the cloners directory](lib/vagrant-cloner/cloners/testcloner.rb). For more detailed examples, look at the other cloners there!
+
+### How is this possibly useful for me?
+
+Keep in mind that `Cloner` exposes the `ssh`, `scp`, and `vm` methods to your class, so, in combination with `Kernel#system`, you can do pretty much anything on either host, VM, or remote server that you can do in (z|ba)sh.
+
+The `vm` method, as an aside, is just a reference to the SSH communicator of Vagrant, so you can see what it provides [here](https://github.com/mitchellh/vagrant/blob/master/plugins/communicators/ssh/communicator.rb). If you need to actually access the environment, that is made available through the `env` method.
 
 ## Contributing
 
@@ -91,3 +111,6 @@ simply require a file from elsewhere or read values in.
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+6. Explain why you think this belongs in the code here, and not inside your own gem that requires this one.
+
+Pull requests most graciously accepted.

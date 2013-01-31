@@ -3,7 +3,6 @@ module Vagrant
     class Cloner < Vagrant::Provisioners::Base
 
       def prepare
-        # TODO: Load files from directory?
       end
 
       def provision!

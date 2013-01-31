@@ -2,41 +2,12 @@ module Vagrant
   module Cloners
     class MysqlCloner < Cloner
 
-                      # [Required] The FQDN of the host where data is to be synced from
-      attr_accessor   :remote_host,
-
-                      # [Required] The username and password to access the remote host
-                      :remote_user,
-                      :remote_password,
-
-                      # [Required] The database user and password to access the remote database
-                      :remote_db_user,
-                      :remote_db_password,
-
-                      # [Required] The user and password to the database on the VM
-                      :vm_db_user,
-                      :vm_db_password,
-
-                      # [Optional] The databases that we should clone
-                      # - An empty array indicates we should clone all
-                      # - An array containing '*' will clone all as well;
-                      # - An array containing a list of database names will clone only those.
+      attr_accessor   :remote_host, :remote_user, :remote_password,
+                      :remote_db_user, :remote_db_password,
+                      :vm_db_user, :vm_db_password,
                       :databases_to_clone,
-
-                      # [Optional] The location to temporarily store the database backup on the remote machine
-                      :remote_backup_path,
-
-                      # [Optional] The location to temporarily store the database backup on our machine
-                      :local_backup_path,
-
-                      # [Optional] The location to temporarily store the database backup on the VM
-                      :vm_backup_path,
-
-                      # [Optional] The name of the backup file
-                      :backup_file,
-
-                      # [Optional] Override to change the arguments passed to Net::SSH and Net::SCP.
-                      :remote_credentials
+                      :remote_backup_path, :local_backup_path, :vm_backup_path, :backup_file,
+                      :disable_cleanup, :warned_about_password
 
       def name
         "mysql"
@@ -45,7 +16,10 @@ module Vagrant
       def validate!(env, errors)
         errors.add "Must specify a remote user and host." unless remote_user && remote_host
         errors.add "Must specify a remote database user and password." unless remote_db_user && remote_db_password
-        env.ui.warn "You haven't specified a remote password. Pulling down MySQL databases may fail unless you have proper publickey authentication enabled." unless remote_password
+        unless warned_about_password or remote_password
+          env.ui.warn "You haven't specified a remote password. Pulling down MySQL databases may fail unless you have proper publickey authentication enabled."
+          @warned_about_password = true
+        end
       end
 
       def remote_credentials
@@ -71,6 +45,12 @@ module Vagrant
       def vm_backup_path
         @vm_backup_path ||= "/tmp"
       end
+
+      def disable_cleanup
+        @disable_cleanup.nil? ? false : @disable_cleanup
+      end
+      alias_method :disable_cleanup?, :disable_cleanup
+
 
       def extract_relevant_options
         @enabled                = options.enabled
@@ -131,10 +111,12 @@ module Vagrant
       end
 
       def clean_up
-        ssh(*remote_credentials) {|s| s.exec! "rm #{@remote_backup_location}" } and info "Removed remote backup file."
-        system "rm #{@local_backup_location}" and info "Removed local backup file."
-        vm.execute "rm #{@vm_backup_location}" and info "Removed vm backup file."
-        info "Done!"
+        unless disable_cleanup?
+          ssh(*remote_credentials) {|s| s.exec! "rm #{@remote_backup_location}" } and info "Removed remote backup file."
+          system "rm #{@local_backup_location}" and info "Removed local backup file."
+          vm.execute "rm #{@vm_backup_location}" and info "Removed vm backup file."
+          info "Done!"
+        end
       end
     end
   end
