@@ -37,26 +37,25 @@ end
 
 The following keys are valid:
 
-- **extra_cloners_directory** - a full path to a directory where you can load your own cloners. Loaded files should load their configuration into the **cloners** section if composed properly.
 - **cloners**
-  - **mysql**
-    - **enabled** - Boolean whether to use this cloner or not. Defaults to false.
-    - **remote_host** - String containing the remote server's FQDN.
-    - **remote_user** - Username to connect to remote server.
-    - **remote_password** - Optional: Password to connect to remote server. (Can be ignored if using publickey auth.)
-    - **remote_db_user** - Username to remote database server.
-    - **remote_db_password** - Password to remote database server.
-    - **vm_db_user** - Username to database server on VM.
-    - **vm_db_password** - Password to database server on VM.
-    - **databases_to_clone** - Optional: Array of databases to copy down. Defaults to 'all'.
-    - **remote_backup_path** - Optional: Where to dump databases to on remote server. Defaults to '/tmp'.
-    - **local_backup_path** - Optional: Where to store databases on host machine. Defaults to '/tmp'.
-    - **vm_backup_path** - Optional: Where to upload databases on VM. Defaults to '/tmp'.
-    - **backup_file** - Optional: Name for database dump. Defaults to mysql-dump-YYYY-MM-DD.sql.
-    - **disable_cleanup** - Optional: Don't remove database dumps after completion. Defaults to false.
-  - **testcloner**
-    - **enabled** - Boolean whether to use this cloner or not. Defaults to false.
-    - **foo** - String containing a message to print to console.
+    - **mysql**
+        - **enabled** - Boolean whether to use this cloner or not. Defaults to false.
+        - **remote_host** - String containing the remote server's FQDN.
+        - **remote_user** - Username to connect to remote server.
+        - **remote_password** - Optional: Password to connect to remote server. (Can be ignored if using publickey auth.)
+        - **remote_db_user** - Username to remote database server.
+        - **remote_db_password** - Password to remote database server.
+        - **vm_db_user** - Username to database server on VM.
+        - **vm_db_password** - Password to database server on VM.
+        - **databases_to_clone** - Optional: Array of databases to copy down. Defaults to 'all'.
+        - **remote_backup_path** - Optional: Where to dump databases to on remote server. Defaults to '/tmp'.
+        - **local_backup_path** - Optional: Where to store databases on host machine. Defaults to '/tmp'.
+        - **vm_backup_path** - Optional: Where to upload databases on VM. Defaults to '/tmp'.
+        - **backup_file** - Optional: Name for database dump. Defaults to mysql-dump-YYYY-MM-DD.sql.
+        - **disable_cleanup** - Optional: Don't remove database dumps after completion. Defaults to false.
+    - **testcloner**
+        - **enabled** - Boolean whether to use this cloner or not. Defaults to false.
+        - **foo** - String containing a message to print to console.
 
 If you have some concern about storing passwords in this file (i.e. your Vagrantfile
 is under version control), remember that the Vagrantfile is fully executed, so you can
