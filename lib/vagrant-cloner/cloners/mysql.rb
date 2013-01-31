@@ -1,7 +1,6 @@
 module Vagrant
   module Cloners
     class MysqlCloner < Cloner
-      attr_reader     :remote_credentials
 
                       # [Required] The FQDN of the host where data is to be synced from
       attr_accessor   :remote_host,
@@ -43,8 +42,18 @@ module Vagrant
         "mysql"
       end
 
+      def validate!(env, errors)
+        errors.add "Must specify a remote user and host." unless remote_user && remote_host
+        errors.add "Must specify a remote database user and password." unless remote_db_user && remote_db_password
+        env.ui.warn "You haven't specified a remote password. Pulling down MySQL databases may fail unless you have proper publickey authentication enabled." unless remote_password
+      end
+
       def remote_credentials
-        [@remote_host, @remote_user, {:password => @remote_password}]
+        return @remote_credentials unless @remote_credentials.nil?
+
+        creds = [@remote_host, @remote_user]
+        creds.push :password => remote_password if remote_password
+        creds
       end
 
       def databases_to_clone
@@ -62,7 +71,6 @@ module Vagrant
       def vm_backup_path
         @vm_backup_path ||= "/tmp"
       end
-
 
       def extract_relevant_options
         @enabled                = options.enabled

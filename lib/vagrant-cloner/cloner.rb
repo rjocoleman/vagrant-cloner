@@ -17,7 +17,7 @@ module Vagrant
         raise "Cloner must define #name and return a string."
       end
 
-      def validate!
+      def validate!(env, errors)
         true
       end
 

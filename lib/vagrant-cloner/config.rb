@@ -48,7 +48,7 @@ module Vagrant
         def validate(env, errors)
           # errors.add('Remote server must be specified.') unless remote_host
           cloners.select {|c| c.enabled? }.each do |cloner|
-            cloner.validate!
+            cloner.validate!(env, errors)
           end
         end
       end
