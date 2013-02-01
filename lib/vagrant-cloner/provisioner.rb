@@ -7,7 +7,7 @@ module Vagrant
 
       def provision!
         env[:ui].info "Vagrant-Cloner beginning back-up process."
-        config.cloners.select {|c| c.enabled? }.each do |cloner|
+        config.cloners.enabled_by_order do |cloner|
           cloner.tap {|c|
             c.options = config.cloners.send(cloner.name)
             c.env = env

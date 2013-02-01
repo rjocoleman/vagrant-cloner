@@ -11,7 +11,7 @@ module Vagrant
     class Cloner
       include Singleton
 
-      attr_accessor :enabled, :env, :options
+      attr_accessor :enabled, :env, :options, :run_order
 
       def name
         raise "Cloner must define #name and return a string."
@@ -23,6 +23,10 @@ module Vagrant
 
       def enabled?
         @enabled.nil? ? false : @enabled
+      end
+
+      def run_order
+        @run_order ||= 1000
       end
 
       # Shorthand for addressing the SSH communicator to the VM. View available methods

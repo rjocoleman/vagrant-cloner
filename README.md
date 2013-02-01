@@ -38,8 +38,11 @@ end
 The following keys are valid:
 
 - **cloners**
-    - **mysql**
+    - **all cloners**
         - **enabled** - Boolean whether to use this cloner or not. Defaults to false.
+        - **run_order** - Integer value that dictates which order cloners run in. Lower orders run first. Defaults to 1000.
+    - **mysql**
+        - **run_order** - Integer value that dictates which cloner
         - **remote_host** - String containing the remote server's FQDN.
         - **remote_user** - Username to connect to remote server.
         - **remote_password** - Optional: Password to connect to remote server. (Can be ignored if using publickey auth.)
@@ -54,8 +57,11 @@ The following keys are valid:
         - **backup_file** - Optional: Name for database dump. Defaults to mysql-dump-YYYY-MM-DD.sql.
         - **disable_cleanup** - Optional: Don't remove database dumps after completion. Defaults to false.
     - **testcloner**
-        - **enabled** - Boolean whether to use this cloner or not. Defaults to false.
         - **foo** - String containing a message to print to console.
+    - **mysqlcleaner**
+        - **scripts** -- Array containing strings of URLs of remote SQL files to be run against the VM's database.
+        - **vm_db_user** - Username to database server on VM.
+        - **vm_db_password** - Password to database server on VM.
 
 If you have some concern about storing passwords in this file (i.e. your Vagrantfile
 is under version control), remember that the Vagrantfile is fully executed, so you can
@@ -65,6 +71,7 @@ simply require a file from elsewhere or read values in.
 
 - `mysql` - Import a MySQL database(s)
 - `testcloner` - A simple example of a cloner not meant for use.
+- `mysqlcleaner` - Runs arbitrary SQL scripts against the MySQL server. Useful for sanitizing databases imported by the `mysql` cloner.
 
 ## Extra Cloners
 
@@ -80,6 +87,8 @@ Our suggestion is as follows:
 6. Resume using vagrant as usual.
 
 If you make an error in your script, you may have a hard time uninstalling it with `vagrant gem uninstall`. In a trice, you can remove directories in `~/.vagrant.d/gems/gems/` to manually remove troublesome gems. (Note that this was tested on a Linux distribution, so this may vary for Mac and Windows users.)
+
+## How to Write a Cloner
 
 To operate as a cloner, a class must inherit from `Vagrant::Cloners::Cloner`, and implement at a bare minimum these methods:
 
@@ -99,7 +108,7 @@ A very minimal example [can be found in the cloners directory](lib/vagrant-clone
 
 ### How is this possibly useful for me?
 
-Keep in mind that `Cloner` exposes the `ssh`, `scp`, and `vm` methods to your class, so, in combination with `Kernel#system`, you can do pretty much anything on either host, VM, or remote server that you can do in (z|ba)sh.
+`Cloner` exposes the `ssh`, `scp`, and `vm` methods to your class, so, in combination with `Kernel#system`, you can do pretty much anything on either host, VM, or remote server that you can do in (z|ba)sh.
 
 The `vm` method, as an aside, is just a reference to the SSH communicator of Vagrant, so you can see what it provides [here](https://github.com/mitchellh/vagrant/blob/master/plugins/communicators/ssh/communicator.rb). If you need to actually access the environment, that is made available through the `env` method.
 

@@ -27,6 +27,11 @@ module Vagrant
         members.each {|m| yield m, send(m)}
         self
       end
+
+      def enabled_by_order
+        members.select(&:enabled?).sort_by(&:run_order).each {|m| yield send(m)}
+      end
+
     end
 
     class Cloner
