@@ -7,8 +7,8 @@ version = '0.9.1'
 Gem::Specification.new do |gem|
   gem.name          = "vagrant-cloner"
   gem.version       = version
-  gem.authors       = ["Rob Yurkowski"]
-  gem.email         = ["rob@yurkowski.net"]
+  gem.authors       = ["Robert Coleman", "Rob Yurkowski"]
+  gem.email         = ["github@robert.net.nz", "rob@yurkowski.net"]
   gem.description   = %q{Copy production resources down to your new VM.}
   gem.summary       = %q{Copy production resources down to your new VM.}
   gem.homepage      = "https://github.com/robyurkowski/vagrant-cloner/"
