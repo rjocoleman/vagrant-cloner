@@ -34,4 +34,4 @@ module Etailer
   end
 end
 
-Vagrant::Provisioners::Cloner::ClonerConfig.register_cloner Etailer::MysqlCleanerCloner.instance.name
+Vagrant::Provisioners::Cloner::ClonerConfig.register_cloner Etailer::MysqlCleanerCloner.instance.name, Etailer::MysqlCleanerCloner.instance
