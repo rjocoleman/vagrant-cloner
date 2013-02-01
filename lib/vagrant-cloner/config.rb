@@ -29,7 +29,10 @@ module Vagrant
       end
 
       def enabled_by_order
-        members.select(&:enabled?).sort_by(&:run_order).each {|m| yield send(m)}
+        members.collect {|m| send(m)} # Get all plugin instances
+          .select {|m| m.enabled? } # Only enabled
+          .sort_by(&:run_order) # Sort by run order
+          .each {|m| yield m} # Yield up
       end
 
     end

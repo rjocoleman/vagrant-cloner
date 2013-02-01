@@ -29,6 +29,7 @@ Vagrant::Config.run do |config|
     cfg.cloners.mysql.tap do |c|
       # Set options here.
       c.enabled = true
+      c.run_order = 10
       # ...
     end
   end
@@ -38,11 +39,10 @@ end
 The following keys are valid:
 
 - **cloners**
-    - **all cloners**
-        - **enabled** - Boolean whether to use this cloner or not. Defaults to false.
-        - **run_order** - Integer value that dictates which order cloners run in. Lower orders run first. Defaults to 1000.
+    - **(all cloners)**
+        - **enabled** - Required: Boolean whether to use this cloner or not. Defaults to false.
+        - **run_order** - Suggested: Integer value that dictates which order cloners run in. Lower orders run first. Defaults to 1000.
     - **mysql**
-        - **run_order** - Integer value that dictates which cloner
         - **remote_host** - String containing the remote server's FQDN.
         - **remote_user** - Username to connect to remote server.
         - **remote_password** - Optional: Password to connect to remote server. (Can be ignored if using publickey auth.)
