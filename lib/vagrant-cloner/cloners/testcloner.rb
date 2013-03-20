@@ -1,6 +1,6 @@
-module Vagrant
+module VagrantCloner
   module Cloners
-    class TestCloner < Cloner
+    class TestCloner < ::VagrantCloner::BaseCloner
       attr_accessor :foo
 
       def name
@@ -18,7 +18,7 @@ module Vagrant
   end
 end
 
-Vagrant::Provisioners::Cloner::ClonerConfig.register_cloner Vagrant::Cloners::TestCloner.instance.name, Vagrant::Cloners::TestCloner.instance
+VagrantCloner::Plugin::ClonerConfig.register_cloner VagrantCloner::Cloners::TestCloner.instance.name, VagrantCloner::Cloners::TestCloner.instance
 
 # Inside your vagrant file, make sure you add the section for this cloner!
 #  # ...

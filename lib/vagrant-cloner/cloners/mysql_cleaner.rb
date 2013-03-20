@@ -1,5 +1,5 @@
 module Etailer
-  class MysqlCleanerCloner < ::Vagrant::Cloners::Cloner
+  class MysqlCleanerCloner < ::VagrantCloner::BaseCloner
     attr_accessor :vm_db_user, :vm_db_password
 
     def name
@@ -34,4 +34,4 @@ module Etailer
   end
 end
 
-Vagrant::Provisioners::Cloner::ClonerConfig.register_cloner Etailer::MysqlCleanerCloner.instance.name, Etailer::MysqlCleanerCloner.instance
+VagrantCloner::Plugin::ClonerConfig.register_cloner Etailer::MysqlCleanerCloner.instance.name, Etailer::MysqlCleanerCloner.instance

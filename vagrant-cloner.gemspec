@@ -18,6 +18,6 @@ Gem::Specification.new do |gem|
   # gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
   
-  gem.signing_key = '/Users/rjocoleman/.gemcert/gem-private_key.pem'
-  gem.cert_chain  = ['gem-public_cert.pem']
+  # gem.signing_key = '/Users/rjocoleman/.gemcert/gem-private_key.pem'
+  # gem.cert_chain  = ['gem-public_cert.pem']
 end

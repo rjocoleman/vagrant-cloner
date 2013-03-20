@@ -1,6 +1,6 @@
-module Vagrant
+module VagrantCloner
   module Cloners
-    class MysqlCloner < Cloner
+    class MysqlCloner < ::VagrantCloner::BaseCloner
 
       attr_accessor   :remote_host, :remote_user, :remote_password,
                       :remote_db_user, :remote_db_password,
@@ -122,4 +122,4 @@ module Vagrant
   end
 end
 
-Vagrant::Provisioners::Cloner::ClonerConfig.register_cloner Vagrant::Cloners::MysqlCloner.instance.name, Vagrant::Cloners::MysqlCloner.instance
+VagrantCloner::Plugin::ClonerConfig.register_cloner VagrantCloner::Cloners::MysqlCloner.instance.name, VagrantCloner::Cloners::MysqlCloner.instance
