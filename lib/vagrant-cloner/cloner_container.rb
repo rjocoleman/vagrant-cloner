@@ -1,8 +1,11 @@
 require 'ostruct'
+require 'singleton'
 
 module VagrantCloner
   class ClonerContainer < OpenStruct
+    include Singleton
     include Enumerable
+
     def members
       methods(false).grep(/=/).map {|m| m[0...-1] }
     end

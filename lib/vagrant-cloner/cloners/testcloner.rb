@@ -21,7 +21,7 @@ module VagrantCloner
   end
 end
 
-VagrantCloner::Plugin::ClonerConfig.register_cloner VagrantCloner::Cloners::TestCloner.instance
+VagrantCloner::ClonerContainer.instance.send("#{VagrantCloner::Cloners::TestCloner.instance.name}=".to_sym, VagrantCloner::Cloners::TestCloner.instance)
 
 # Inside your vagrant file, make sure you add the section for this cloner!
 #  # ...

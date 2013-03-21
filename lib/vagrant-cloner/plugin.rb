@@ -1,13 +1,22 @@
+require 'vagrant-cloner/cloner_container'
+require 'vagrant-cloner/base_cloner'
+Dir[File.join(File.dirname(__FILE__), 'cloners', '*.rb')].each {|f| require f }
+
 module VagrantCloner
   class Plugin < ::Vagrant.plugin("2")
     name "Cloner"
 
-    provisioner "cloner" do
-      require 'vagrant-cloner/provisioner'
+    config(:cloner, :provisioner) do
       require 'vagrant-cloner/config'
-      # require 'vagrant-cloner/base_cloner'
-      # Dir[File.join(File.dirname(__FILE__), 'vagrant-cloner', 'cloners', '*.rb')].each {|f| require f }
+      ::VagrantCloner::Config.tap do |c| 
+        c.registered_cloners = ::VagrantCloner::ClonerContainer.instance
+      end
+    end
+
+    provisioner(:cloner) do
+      require 'vagrant-cloner/provisioner'
       ::VagrantCloner::Provisioner
     end
+
   end
 end

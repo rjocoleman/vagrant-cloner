@@ -127,4 +127,4 @@ module VagrantCloner
   end
 end
 
-VagrantCloner::Plugin::ClonerConfig.register_cloner VagrantCloner::Cloners::MysqlCloner.instance
+VagrantCloner::ClonerContainer.instance.send("#{VagrantCloner::Cloners::MysqlCloner.instance.name}=".to_sym, VagrantCloner::Cloners::MysqlCloner.instance)

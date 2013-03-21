@@ -38,7 +38,7 @@ end
 
 The following keys are valid:
 
-- **cloners**
+- **cloner**
     - **(all cloners)**
         - **enabled** - Required: Boolean whether to use this cloner or not. Defaults to false.
         - **run_order** - Suggested: Integer value that dictates which order cloners run in. Lower orders run first. Defaults to 1000.
@@ -93,16 +93,16 @@ If you make an error in your script, you may have a hard time uninstalling it wi
 To operate as a cloner, a class must inherit from `Vagrant::Cloners::Cloner`, and implement at a bare minimum these methods:
 
 - `name` - Returns a string representation of the cloner's name; used for namespacing config.
-- `validate!(env, errors)` - Can be used to call `errors.add` if there are validations that need to be performed on configuration values.
+- `validate(machine, errors)` - Can be used to call `errors.add` if there are validations that need to be performed on configuration values.
 - `call` - Executes the cloner's routine.
 
 A cloner must also be registered in the config to be run. This is best done after the class has been closed, at the bottom of the file:
 
-`Vagrant::Provisioners::Cloner::ClonerConfig.register_cloner <Class>.instance.name, <Class>.instance`
+`Vagrant::ClonerContainer.instance.send("#{<Class>.instance.name}=".to_sym, <Class>.instance)`
 
 So for the MySQL cloner (which is `Vagrant::Cloners::MysqlCloner`), the line would read 
 
-`Vagrant::Provisioners::Cloner::ClonerConfig.register_cloner Vagrant::Cloners::MysqlCloner.instance.name, Vagrant::Cloners::MysqlCloner.instance`
+`Vagrant::ClonerContainer.instance.send("#{Vagrant::Cloners::MysqlCloner.instance.name}=".to_sym, Vagrant::Cloners::MysqlCloner.instance)`
 
 A very minimal example [can be found in the cloners directory](lib/vagrant-cloner/cloners/testcloner.rb). For more detailed examples, look at the other cloners there!
 

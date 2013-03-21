@@ -1,26 +1,19 @@
-require 'vagrant-cloner/cloner_container'
-
 module VagrantCloner
   class Config < Vagrant.plugin("2", :config)
     class << self
-      def registered_cloners
-        @@registered_cloners ||= ::VagrantCloner::ClonerContainer.new
-      end
-
-      def register_cloner(instance)
-        registered_cloners.send("#{instance.name}=".to_sym, instance)
-      end
+      attr_accessor :registered_cloners
     end
 
-    def cloners
-      @@registered_cloners
+    def cloner
+      self.class.registered_cloners ||= []
     end
 
     def validate(machine)
       errors = {}
-      cloners.select {|c| c.enabled? }.each do |cloner|
-        cloner.validate!(machine, errors)
+      cloner.select {|c| c.enabled? }.each do |c|
+        c.validate(machine, errors)
       end
+      errors
     end
   end
 end

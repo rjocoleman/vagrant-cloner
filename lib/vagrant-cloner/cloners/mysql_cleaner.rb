@@ -14,7 +14,7 @@ module Etailer
       @scripts = Array(scripts).flatten
     end
 
-    def validate!(machine, errors)
+    def validate(machine, errors)
       failures = []
       failures.push "You have to specify at least one script to run!" if scripts.nil? || scripts.empty?
       failures.push "You must specify a VM database user and password!" unless vm_db_user && vm_db_password
@@ -37,4 +37,4 @@ module Etailer
   end
 end
 
-VagrantCloner::Plugin::ClonerConfig.register_cloner Etailer::MysqlCleanerCloner.instance
+VagrantCloner::ClonerContainer.instance.send("#{Etailer::MysqlCleanerCloner.instance.name}=".to_sym, Etailer::MysqlCleanerCloner.instance)
