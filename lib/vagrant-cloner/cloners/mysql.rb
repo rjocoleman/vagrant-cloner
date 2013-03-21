@@ -13,13 +13,16 @@ module VagrantCloner
         "mysql"
       end
 
-      def validate!(env, errors)
-        errors.add "Must specify a remote user and host." unless remote_user && remote_host
-        errors.add "Must specify a remote database user and password." unless remote_db_user && remote_db_password
+      def validate(machine, errors)
+        failures = []
+        failures.push "Must specify a remote user and host." unless remote_user && remote_host
+        failures.push "Must specify a remote database user and password." unless remote_db_user && remote_db_password
         unless warned_about_password or remote_password
-          env.ui.warn "You haven't specified a remote password. Pulling down MySQL databases may fail unless you have proper publickey authentication enabled."
+          machine.env.ui.warn "You haven't specified a remote password. Pulling down MySQL databases may fail unless you have proper publickey authentication enabled."
           @warned_about_password = true
         end
+
+        errors.merge(name.to_sym => failures) if failures.any?
       end
 
       def remote_credentials
@@ -105,8 +108,10 @@ module VagrantCloner
       end
 
       def import_database
-        vm.upload @local_backup_location, @vm_backup_location
-        vm.execute "mysql -u#{@vm_db_user} -p#{@vm_db_password} < #{@vm_backup_location}"
+        vm.tap do |host|
+          host.upload @local_backup_location, @vm_backup_location
+          host.execute "mysql -u#{@vm_db_user} -p#{@vm_db_password} < #{@vm_backup_location}"
+        end
         info "Done loading database."
       end
 
@@ -122,4 +127,4 @@ module VagrantCloner
   end
 end
 
-VagrantCloner::Plugin::ClonerConfig.register_cloner VagrantCloner::Cloners::MysqlCloner.instance.name, VagrantCloner::Cloners::MysqlCloner.instance
+VagrantCloner::Plugin::ClonerConfig.register_cloner VagrantCloner::Cloners::MysqlCloner.instance

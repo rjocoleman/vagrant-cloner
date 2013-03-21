@@ -1,14 +1,14 @@
 module VagrantCloner
-  class Provisioner
-    def prepare
+  class Provisioner < Vagrant.plugin("2", :provisioner)
+    def configure(cfg)
     end
 
-    def provision!
-      env[:ui].info "Vagrant-Cloner beginning back-up process."
+    def provision
+      @machine.env.ui.info "Vagrant-Cloner beginning back-up process."
       config.cloners.enabled_by_order do |cloner|
         cloner.tap {|c|
           c.options = config.cloners.send(cloner.name)
-          c.env = env
+          c.machine = @machine
         }.call
       end
     end

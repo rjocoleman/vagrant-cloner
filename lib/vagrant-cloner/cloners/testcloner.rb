@@ -7,8 +7,11 @@ module VagrantCloner
         "testcloner"
       end
 
-      def validate!(env, errors)
-        errors.add("Must specify a foo") unless foo
+      def validate(machine, errors)
+        failures = []
+        failures.push "Must specify a foo" unless foo
+
+        failures.merge(name.to_sym => failures) if failures.any?
       end
 
       def call
@@ -18,7 +21,7 @@ module VagrantCloner
   end
 end
 
-VagrantCloner::Plugin::ClonerConfig.register_cloner VagrantCloner::Cloners::TestCloner.instance.name, VagrantCloner::Cloners::TestCloner.instance
+VagrantCloner::Plugin::ClonerConfig.register_cloner VagrantCloner::Cloners::TestCloner.instance
 
 # Inside your vagrant file, make sure you add the section for this cloner!
 #  # ...

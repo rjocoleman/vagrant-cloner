@@ -10,13 +10,14 @@ module VagrantCloner
   class BaseCloner
     include Singleton
 
-    attr_accessor :enabled, :env, :options, :run_order
+    attr_accessor :enabled, :machine, :options, :run_order
+    attr_reader :env
 
     def name
       raise "Cloner must define #name and return a string."
     end
 
-    def validate!(env, errors)
+    def validate(machine, errors)
       true
     end
 
@@ -32,7 +33,7 @@ module VagrantCloner
     # here:
     # https://github.com/mitchellh/vagrant/blob/master/plugins/communicators/ssh/communicator.rb
     def vm
-      env[:vm].channel
+      @machine.communicate
     end
 
     # Opens an SSH connection to an arbitrary server and passes it to a supplied block.
@@ -62,7 +63,7 @@ module VagrantCloner
     # Wrap debugging options.
     %w(info warn error success).each do |meth|
       define_method(meth) do |message|
-        env[:ui].send(meth.to_sym, message)
+        @machine.env.ui.send(meth.to_sym, message)
       end
       protected meth.to_sym
     end
