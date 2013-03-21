@@ -26,7 +26,7 @@ Vagrant::Config.run do |config|
   end
 
   config.vm.provision :cloner do |cfg|
-    cfg.cloners.mysql.tap do |c|
+    cfg.cloner.mysql.tap do |c|
       # Set options here.
       c.enabled = true
       c.run_order = 10
