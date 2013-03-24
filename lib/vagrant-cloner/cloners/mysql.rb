@@ -97,7 +97,7 @@ module VagrantCloner
       end
 
       def dump_remote_database
-        command = "mysqldump -u#{@remote_db_user} -p#{@remote_db_password} #{mysql_database_flag} > #{@remote_backup_location}"
+        command = "mysqldump -u#{@remote_db_user} -p\"#{@remote_db_password}\" #{mysql_database_flag} > #{@remote_backup_location}"
         ssh(*remote_credentials) {|s| s.exec! command }
         info "Finished dumping database!"
       end
@@ -110,7 +110,7 @@ module VagrantCloner
       def import_database
         vm.tap do |host|
           host.upload @local_backup_location, @vm_backup_location
-          host.execute "mysql -u#{@vm_db_user} -p#{@vm_db_password} < #{@vm_backup_location}"
+          host.execute "mysql -u#{@vm_db_user} -p\"#{@vm_db_password}\" < #{@vm_backup_location}"
         end
         info "Done loading database."
       end
