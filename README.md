@@ -43,6 +43,7 @@ The following keys are valid:
         - **enabled** - Required: Boolean whether to use this cloner or not. Defaults to false.
         - **run_order** - Suggested: Integer value that dictates which order cloners run in. Lower orders run first. Defaults to 1000.
     - **mysql**
+        - **use_ssh** - If false, will attempt to connect to the remote MySQL server at the `remote_host` using the `remote_user` and `remote_password` settings. Elsewise, will SSH into the remote host, export the database, download it locally, upload it to the VM, and install it that way.
         - **remote_host** - String containing the remote server's FQDN.
         - **remote_user** - Username to connect to remote server.
         - **remote_password** - Optional: Password to connect to remote server. (Can be ignored if using publickey auth.)

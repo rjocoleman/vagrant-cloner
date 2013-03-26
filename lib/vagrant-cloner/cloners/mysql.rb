@@ -3,7 +3,7 @@ module VagrantCloner
     class MysqlCloner < ::VagrantCloner::BaseCloner
 
       attr_accessor   :remote_host, :remote_user, :remote_password,
-                      :remote_db_user, :remote_db_password,
+                      :remote_db_user, :remote_db_password, :use_ssh,
                       :vm_db_user, :vm_db_password,
                       :databases_to_clone,
                       :remote_backup_path, :local_backup_path, :vm_backup_path, :backup_file,
@@ -16,7 +16,7 @@ module VagrantCloner
       def validate(machine, errors)
         failures = []
         failures.push "Must specify a remote user and host." unless remote_user && remote_host
-        failures.push "Must specify a remote database user and password." unless remote_db_user && remote_db_password
+        failures.push "Must specify a remote database user and password." unless (remote_db_user && remote_db_password) || use_ssh
         unless warned_about_password or remote_password
           machine.env.ui.warn "You haven't specified a remote password. Pulling down MySQL databases may fail unless you have proper publickey authentication enabled."
           @warned_about_password = true
@@ -54,6 +54,11 @@ module VagrantCloner
       end
       alias_method :disable_cleanup?, :disable_cleanup
 
+      def use_ssh
+        @use_ssh.nil? ? true : @use_ssh
+      end
+      alias_method :use_ssh?, :use_ssh
+
 
       def extract_relevant_options
         @enabled                = options.enabled
@@ -62,6 +67,8 @@ module VagrantCloner
         @remote_password        = options.remote_password
         @remote_db_user         = options.remote_db_user
         @remote_db_password     = options.remote_db_password
+
+        @use_ssh                = options.use_ssh
 
         @databases_to_clone     = options.databases_to_clone
 
@@ -90,10 +97,22 @@ module VagrantCloner
 
       def call
         extract_relevant_options
-        dump_remote_database
-        download_remote_database
-        import_database
-        clean_up
+        if use_ssh?
+          dump_remote_database
+          download_remote_database
+          import_database
+          clean_up
+        else
+          remote_dump_and_pipe
+        end
+      end
+
+      def remote_dump_and_pipe
+        command = %Q{mysqldump --verbose -h #{@remote_host} -u"#{@remote_user}" -p"#{@remote_password}" #{mysql_database_flag} | mysql -u"#{@vm_db_user}" -p"#{@vm_db_password}"}
+        vm.tap do |host|
+          vm.execute command
+        end
+        info "All done!"
       end
 
       def dump_remote_database
