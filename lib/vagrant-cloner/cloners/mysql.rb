@@ -21,7 +21,6 @@ module VagrantCloner
           machine.env.ui.warn "You haven't specified a remote password. Pulling down MySQL databases may fail unless you have proper publickey authentication enabled."
           @warned_about_password = true
         end
-
         errors.merge(name.to_sym => failures) if failures.any?
       end
 
@@ -82,9 +81,9 @@ module VagrantCloner
         @vm_backup_path         = options.vm_backup_path
         @backup_file            = options.backup_file || "mysql-backup-#{datestring}.sql"
 
-        @remote_backup_location = File.join(@remote_backup_path, @backup_file)
-        @local_backup_location  = File.join(@local_backup_path, @backup_file)
-        @vm_backup_location     = File.join(@vm_backup_path, @backup_file)
+        @remote_backup_location = File.join(remote_backup_path, @backup_file)
+        @local_backup_location  = File.join(local_backup_path, @backup_file)
+        @vm_backup_location     = File.join(vm_backup_path, @backup_file)
       end
 
       def mysql_database_flag
@@ -92,6 +91,16 @@ module VagrantCloner
           "--all-databases"
         else
           "--databases #{Array(@databases_to_clone).join(' ')}"
+        end
+      end
+
+      # We don't want to output -p if password is nil, because that will prompt
+      # for a password.
+      def mysql_password_flag(password)
+        if password.nil? || password.empty?
+          ""
+        else
+          %Q{ -p"#{password}"}
         end
       end
 
@@ -108,7 +117,8 @@ module VagrantCloner
       end
 
       def remote_dump_and_pipe
-        command = %Q{mysqldump --verbose -h #{@remote_host} -u"#{@remote_user}" -p"#{@remote_password}" #{mysql_database_flag} | mysql -u"#{@vm_db_user}" -p"#{@vm_db_password}"}
+        info "Doing remote mysqldump..."
+        command = %Q{mysqldump --verbose -h #{@remote_host} -u"#{@remote_user}"#{mysql_password_flag(@remote_password)} #{mysql_database_flag} | mysql -u"#{@vm_db_user}"#{mysql_password_flag(@vm_db_password)}"}
         vm.tap do |host|
           vm.execute command
         end
@@ -116,7 +126,7 @@ module VagrantCloner
       end
 
       def dump_remote_database
-        command = %Q{mysqldump -u"#{@remote_db_user}" -p"#{@remote_db_password}" #{mysql_database_flag} > #{@remote_backup_location}}
+        command = %Q{mysqldump -u"#{@remote_db_user}"#{mysql_password_flag(@remote_db_password)} #{mysql_database_flag} > #{@remote_backup_location}}
         ssh(*remote_credentials) {|s| s.exec! command }
         info "Finished dumping database!"
       end
@@ -129,7 +139,8 @@ module VagrantCloner
       def import_database
         vm.tap do |host|
           host.upload @local_backup_location, @vm_backup_location
-          host.execute %Q{mysql -u"#{@vm_db_user}" -p"#{@vm_db_password}" < #{@vm_backup_location}}
+          command = %Q{mysql -u"#{@vm_db_user}"#{mysql_password_flag(@vm_db_password)} < #{@vm_backup_location}}
+          host.execute command
         end
         info "Done loading database."
       end
@@ -139,11 +150,13 @@ module VagrantCloner
           ssh(*remote_credentials) {|s| s.exec! "rm #{@remote_backup_location}" } and info "Removed remote backup file."
           system "rm #{@local_backup_location}" and info "Removed local backup file."
           vm.execute "rm #{@vm_backup_location}" and info "Removed vm backup file."
-          info "Done!"
+          success "Done!"
         end
       end
     end
   end
 end
 
-VagrantCloner::ClonerContainer.instance.send("#{VagrantCloner::Cloners::MysqlCloner.instance.name}=".to_sym, VagrantCloner::Cloners::MysqlCloner.instance)
+if defined? VagrantCloner::ClonerContainer
+  VagrantCloner::ClonerContainer.instance.send("#{VagrantCloner::Cloners::MysqlCloner.instance.name}=".to_sym, VagrantCloner::Cloners::MysqlCloner.instance)
+end

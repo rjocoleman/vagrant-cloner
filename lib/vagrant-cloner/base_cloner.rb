@@ -63,9 +63,14 @@ module VagrantCloner
     # Wrap debugging options.
     %w(info warn error success).each do |meth|
       define_method(meth) do |message|
-        @machine.env.ui.send(meth.to_sym, message)
+        machine.env.ui.send(meth.to_sym, message)
       end
       protected meth.to_sym
     end
+
+    def debug(message)
+      machine.env.ui.info message
+    end
+    protected :debug
   end
 end

@@ -14,8 +14,8 @@ Gem::Specification.new do |gem|
   gem.homepage      = "https://github.com/rjocoleman/vagrant-cloner/"
 
   gem.files         = `git ls-files`.split($/)
+  gem.test_files    = gem.files.grep(%r{^(spec)/})
   # gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
-  # gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
   
   gem.signing_key = '/Users/rjocoleman/.gemcert/gem-private_key.pem'
