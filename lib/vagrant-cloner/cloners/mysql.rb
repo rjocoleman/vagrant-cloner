@@ -118,7 +118,7 @@ module VagrantCloner
 
       def remote_dump_and_pipe
         info "Doing remote mysqldump..."
-        command = %Q{mysqldump --verbose -h #{@remote_host} -u"#{@remote_user}"#{mysql_password_flag(@remote_password)} #{mysql_database_flag} | mysql -u"#{@vm_db_user}"#{mysql_password_flag(@vm_db_password)}"}
+        command = %Q{mysqldump --verbose -h #{@remote_host} -u"#{@remote_user}"#{mysql_password_flag(@remote_password)} #{mysql_database_flag} | mysql -u"#{@vm_db_user}"#{mysql_password_flag(@vm_db_password)}}
         vm.tap do |host|
           vm.execute command
         end
