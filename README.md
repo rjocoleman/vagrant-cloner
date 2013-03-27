@@ -4,9 +4,9 @@ Copy down production resources to your new Vagrant VM.
 
 ## Installation
 
-Use vagrant's built-in gem system:
+Use vagrant's built-in plugin system:
 
-    vagrant gem install vagrant-cloner
+    vagrant plugin install vagrant-cloner
 
 ## Usage
 
