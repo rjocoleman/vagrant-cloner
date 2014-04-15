@@ -12,7 +12,7 @@ Use vagrant's built-in plugin system:
 
 You will need to add a `config.vm.provision :cloner` section to your config in
 order for Cloner to work. This should come after your other provisioners; if
-Cloner runs before Chef or Puppet, for example, it's quite conceivable there 
+Cloner runs before Chef or Puppet, for example, it's quite conceivable there
 would be no database to restore to!
 
 Each cloner has its own section inside the configuration, and this is the
@@ -60,7 +60,7 @@ The following keys are valid:
     - **testcloner**
         - **foo** - String containing a message to print to console.
     - **mysqlcleaner**
-        - **scripts** -- Array containing strings of URLs of remote SQL files to be run against the VM's database.
+        - **scripts** -- Array containing strings of URLs of SQL files to be run against the VM's database (curl is used to fetch these).
         - **vm_db_user** - Username to database server on VM.
         - **vm_db_password** - Password to database server on VM.
 
@@ -101,7 +101,7 @@ A cloner must also be registered in the config to be run. This is best done afte
 
 `Vagrant::ClonerContainer.instance.send("#{<Class>.instance.name}=".to_sym, <Class>.instance)`
 
-So for the MySQL cloner (which is `Vagrant::Cloners::MysqlCloner`), the line would read 
+So for the MySQL cloner (which is `Vagrant::Cloners::MysqlCloner`), the line would read
 
 `Vagrant::ClonerContainer.instance.send("#{Vagrant::Cloners::MysqlCloner.instance.name}=".to_sym, Vagrant::Cloners::MysqlCloner.instance)`
 

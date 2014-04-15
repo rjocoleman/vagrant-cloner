@@ -2,7 +2,7 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-version = '2.1.0'
+version = '2.1.1'
 
 Gem::Specification.new do |gem|
   gem.name          = "vagrant-cloner"
@@ -17,7 +17,5 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(spec)/})
   # gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.require_paths = ["lib"]
-  
-  gem.signing_key = '/Users/rjocoleman/.gemcert/gem-private_key.pem'
-  gem.cert_chain  = ['gem-public_cert.pem']
+
 end

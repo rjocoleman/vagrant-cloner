@@ -25,12 +25,12 @@ module Etailer
     def mysql_connection_string
       "-u#{vm_db_user} -p#{vm_db_password}"
     end
-      
+
     def call
       @scripts.each do |script|
         info "Fetching script #{script}..."
         basename = script.split("/").last
-        vm.execute "wget #{script} -P /tmp"
+        vm.execute "curl #{script} -o /tmp/#{basename}"
         vm.execute "mysql #{mysql_connection_string} < /tmp/#{basename}"
       end
     end

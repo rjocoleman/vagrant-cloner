@@ -16,11 +16,11 @@ module VagrantCloner
     describe MysqlCloner do
       describe "#extract_relevant_options" do
         describe "when missing keys" do
-          before do 
-            subject.stub!(:options).and_return(OpenStruct.new({:remote_db_password => ''}))
+          before do
+            subject.stub(:options).and_return(OpenStruct.new({:remote_db_password => ''}))
             subject.extract_relevant_options
           end
-          
+
           its(:remote_db_password) { should be_empty }
         end
       end
